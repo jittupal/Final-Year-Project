@@ -11,6 +11,7 @@ export default function Chat() {
   const [onlinePeople,setOnlinePeople] = useState({});
   const [offlinePeople,setOfflinePeople] = useState({});
   const [selectedUserId,setSelectedUserId] = useState(null);
+  const [typingStatus, setTypingStatus] = useState(null);
   const [newMessageText,setNewMessageText] = useState('');
   const [messages,setMessages] = useState([]);
   const {username,id,setId,setUsername} = useContext(UserContext);
@@ -44,6 +45,11 @@ export default function Chat() {
     } else if ('text' in messageData) {
       if (messageData.sender === selectedUserId) {
         setMessages(prev => ([...prev, {...messageData}]));
+      }
+    } else if ('typing' in messageData) {
+      if (messageData.sender === selectedUserId) {
+        setTypingStatus(true);
+        setTimeout(() => setTypingStatus(false), 6000);
       }
     }
   }
@@ -84,6 +90,13 @@ export default function Chat() {
         data: reader.result,
       });
     };
+  }
+
+  function handleTyping() {
+    ws.send(JSON.stringify({
+      recipient: selectedUserId,
+      typing: true,
+    }));
   }
 
   useEffect(() => {
@@ -201,6 +214,7 @@ export default function Chat() {
               </div>
             </div>
           ))}
+          {typingStatus && <div className="text-gray-500 text-sm">Typing...</div>}
           <div ref={divUnderMessages}></div>
         </div>
       </div>
@@ -210,7 +224,7 @@ export default function Chat() {
    <form className="flex gap-2 p-4 bg-white rounded-lg shadow-md border border-gray-200" onSubmit={sendMessage}>
    <input type="text"
           value={newMessageText}
-          onChange={ev => setNewMessageText(ev.target.value)}
+          onChange={ev => { setNewMessageText(ev.target.value); handleTyping(); }}
           placeholder="Type your message here"
           className="bg-gray-100 flex-grow border border-gray-300 rounded-lg p-3 shadow-sm focus:ring-2 focus:ring-blue-300"/>
    <label className="bg-blue-300 p-3 text-gray-700 cursor-pointer rounded-lg border border-blue-400 hover:bg-blue-400 transition-all">
