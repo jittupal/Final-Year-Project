@@ -214,7 +214,14 @@ export default function Chat() {
               </div>
             </div>
           ))}
-          {typingStatus && <div className="text-gray-500 text-sm">Typing...</div>}
+          {typingStatus && (
+  <div className="flex items-center gap-2 text-lg font-semibold text-gray-600 mt-2">
+    Typing
+    <span className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></span>
+    <span className="w-3 h-3 bg-green-500 rounded-full animate-bounce delay-200"></span>
+    <span className="w-3 h-3 bg-purple-500 rounded-full animate-bounce delay-400"></span>
+  </div>
+)}
           <div ref={divUnderMessages}></div>
         </div>
       </div>
