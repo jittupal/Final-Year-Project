@@ -91,6 +91,44 @@ app.post('/login', async (req,res) => {
   }
 });
 
+
+app.delete('/messages/:id', async (req, res) => {
+  let { id } = req.params;
+
+  try {
+    // Ensure id is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid message ID' });
+    }
+
+    // Convert to ObjectId before querying
+    id = new mongoose.Types.ObjectId(id);
+
+    const deletedMessage = await Message.findByIdAndDelete(id);
+    
+    if (!deletedMessage) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    // Notify sender & recipient via WebSocket
+    [...wss.clients]
+      .filter(c => c.userId === deletedMessage.sender.toString() || c.userId === deletedMessage.recipient.toString())
+      .forEach(c => c.send(JSON.stringify({
+        type: 'messageDeleted',
+        messageId: id.toString(),
+      })));
+
+    console.log(`Message ${id} deleted successfully`);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting message:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
+
 app.post('/logout', (req,res) => {
   res.cookie('token', '', {sameSite:'none', secure:true}).json('ok');
 });
@@ -118,6 +156,9 @@ app.post('/register', async (req,res) => {
 const server = app.listen(4040);
 
 const wss = new ws.WebSocketServer({server});
+
+
+
 wss.on('connection', (connection, req) => {
 
   function notifyAboutOnlinePeople() {
@@ -207,6 +248,8 @@ wss.on('connection', (connection, req) => {
         })));
     }
   });
+
+
 
   // notify everyone about online people (when someone connects)
   notifyAboutOnlinePeople();

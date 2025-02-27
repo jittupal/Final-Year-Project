@@ -5,6 +5,7 @@ import {UserContext} from "./UserContext.jsx";
 import {uniqBy} from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
+import { v4 as uuidv4 } from "uuid"; // Import UUID library
 
 export default function Chat() {
   const [ws,setWs] = useState(null);
@@ -39,20 +40,43 @@ export default function Chat() {
   }
   function handleMessage(ev) {
     const messageData = JSON.parse(ev.data);
-    console.log({ev,messageData});
     if ('online' in messageData) {
       showOnlinePeople(messageData.online);
     } else if ('text' in messageData) {
       if (messageData.sender === selectedUserId) {
-        setMessages(prev => ([...prev, {...messageData}]));
+        setMessages(prev => ([...prev, { ...messageData }]));
       }
     } else if ('typing' in messageData) {
       if (messageData.sender === selectedUserId) {
         setTypingStatus(true);
-        setTimeout(() => setTypingStatus(false), 6000);
+        setTimeout(() => setTypingStatus(false), 2000);
       }
+    } else if ('delete-message' in messageData) {
+      // Ensure the deleted message is removed from the UI in real-time
+      setMessages(prev => prev.filter(msg => msg._id !== messageData.messageId));
     }
   }
+  
+
+  function deleteMessage(messageId) {
+    if (!messageId || typeof messageId !== "string") {
+      console.error("Invalid messageId:", messageId);
+      return;
+    }
+  
+    axios.delete(`/messages/${messageId}`)
+      .then(() => {
+        setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+        ws.send(JSON.stringify({
+          type: "delete-message",
+          messageId,
+        }));
+      })
+      .catch(error => console.error("Delete error:", error.response?.data || error));
+  }
+  
+  
+
   function logout() {
     axios.post('/logout').then(() => {
       setWs(null);
@@ -77,7 +101,7 @@ export default function Chat() {
         text: newMessageText,
         sender: id,
         recipient: selectedUserId,
-        _id: Date.now(),
+        _id: uuidv4(),  // ✅ Generates a temporary valid string ID
       }]));
     }
   }
@@ -201,6 +225,13 @@ export default function Chat() {
             <div key={message._id} className={(message.sender === id ? 'text-right' : 'text-left')}>
               <div className={"text-left inline-block p-3 my-2 rounded-lg text-sm shadow-md " +(message.sender === id ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 border border-gray-300')}>
                 {message.text}
+                 {/* Delete Button (Always Available) */}
+                 <button
+                  onClick={() => deleteMessage(message._id)}
+                  className="ml-2 text-red-500 text-sm"
+                >
+                  Delete
+                </button>
                 {message.file && (
                   <div>
                     <a target="_blank" className="flex items-center gap-1 border-b text-black" href={axios.defaults.baseURL + '/uploads/' + message.file}>
