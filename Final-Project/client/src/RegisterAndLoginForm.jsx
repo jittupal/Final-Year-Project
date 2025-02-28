@@ -8,6 +8,10 @@ export default function RegisterAndLoginForm() {
   const [password, setPassword] = useState("");
   const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [email, setEmail] = useState("");
+
+
 
   async function handleSubmit(ev) {
     ev.preventDefault();
@@ -16,6 +20,23 @@ export default function RegisterAndLoginForm() {
     setLoggedInUsername(username);
     setId(data.id);
   }
+
+
+  async function handleForgotPassword(ev) {
+    ev.preventDefault();
+    const newPassword = prompt("Enter your new password:");
+    if (!newPassword) return;
+  
+    try {
+      const response = await axios.post("reset-password", { username: email, newPassword });
+      alert(response.data.message);
+      setShowForgotPassword(false);
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      alert("Failed to reset password");
+    }
+  }
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center p-8 relative overflow-hidden" style={{ backgroundImage: `url(${backimg})` }}>
@@ -44,6 +65,33 @@ export default function RegisterAndLoginForm() {
           </button>
         </form>
         
+ {/* Forgot Password Button */}
+ {isLoginOrRegister === "login" && (
+          <button
+            onClick={() => setShowForgotPassword(!showForgotPassword)}
+            className="mt-3 text-sm text-gray-700 hover:underline w-full text-center"
+          >
+            Forgot Password?
+          </button>
+        )}
+
+        {/* Forgot Password Form (Appears on Click) */}
+        {showForgotPassword && (
+          <form onSubmit={handleForgotPassword} className="mt-3 bg-gray-100 p-4 rounded-md shadow w-full">
+            <input
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              className="w-full p-2 border border-gray-300 rounded-md"
+              required
+            />
+            <button type="submit" className="mt-2 w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
+              Reset Password
+            </button>
+          </form>
+        )}
+
         <div className="text-center mt-6 text-gray-900 text-opacity-80">
           {isLoginOrRegister === "register" ? (
             <p>

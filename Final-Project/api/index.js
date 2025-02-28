@@ -128,6 +128,26 @@ app.delete('/messages/:id', async (req, res) => {
   }
 });
 
+app.post('/reset-password', async (req, res) => {
+  const { username, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const hashedPassword = bcrypt.hashSync(newPassword, bcryptSalt);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success: true, message: 'Password has been reset successfully' });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 
 
