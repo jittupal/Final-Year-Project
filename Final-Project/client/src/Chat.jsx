@@ -59,6 +59,9 @@ export default function Chat() {
   
 
   function deleteMessage(messageId) {
+
+    console.log("message id: ", messageId)
+
     if (!messageId || typeof messageId !== "string") {
       console.error("Invalid messageId:", messageId);
       return;
@@ -84,6 +87,14 @@ export default function Chat() {
       setUsername(null);
     });
   }
+
+  function generateObjectId() {
+    return Math.floor(Date.now() / 1000).toString(16) + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () =>
+      (Math.random() * 16 | 0).toString(16)
+    );
+  }
+  
+
   function sendMessage(ev, file = null) {
     if (ev) ev.preventDefault();
     ws.send(JSON.stringify({
@@ -101,7 +112,7 @@ export default function Chat() {
         text: newMessageText,
         sender: id,
         recipient: selectedUserId,
-        _id: uuidv4(),  // ✅ Generates a temporary valid string ID
+        _id: generateObjectId(),  // ✅ Generates a temporary valid string ID
       }]));
     }
   }

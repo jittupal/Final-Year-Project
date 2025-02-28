@@ -95,6 +95,8 @@ app.post('/login', async (req,res) => {
 app.delete('/messages/:id', async (req, res) => {
   let { id } = req.params;
 
+  console.log("message id: ", id)
+
   try {
     // Ensure id is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
