@@ -6,7 +6,8 @@ import { toast } from 'react-toastify';
 
 export default function RegisterAndLoginForm() {
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); // Used for Login/Register
+  const [forgotEmail, setForgotEmail] = useState(""); // NEW: Separate state for forgot password form
   const [password, setPassword] = useState("");
   const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
@@ -40,9 +41,10 @@ export default function RegisterAndLoginForm() {
     if (!newPassword) return;
     
     try {
-      const response = await axios.post("reset-password", { email, newPassword });
+      const response = await axios.post("reset-password", { email: forgotEmail, newPassword });
       toast.success(response.data.message);
       setShowForgotPassword(false);
+      setForgotEmail(""); // Clear input after reset
     } catch (error) {
       console.error("Error resetting password:", error);
       toast.error("Failed to reset password");
@@ -106,8 +108,8 @@ export default function RegisterAndLoginForm() {
     
     <input
       type="email"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
+      value={forgotEmail} // Use separate forgotEmail state
+      onChange={(e) => setForgotEmail(e.target.value)}
       placeholder="Enter your email"
       className="w-full mt-4 p-3 rounded-xl bg-white bg-opacity-20 text-black placeholder-black border border-black focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
       required
