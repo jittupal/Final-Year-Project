@@ -94,21 +94,40 @@ export default function RegisterAndLoginForm() {
           </button>
         )}
 
-        {showForgotPassword && (
-          <form onSubmit={handleForgotPassword} className="mt-3 bg-gray-100 p-4 rounded-md shadow w-full">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email or username"
-              className="w-full p-2 border border-gray-300 rounded-md"
-              required
-            />
-            <button type="submit" className="mt-2 w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600">
-              Reset Password
-            </button>
-          </form>
-        )}
+{showForgotPassword && (
+  <form
+    onSubmit={handleForgotPassword}
+    className="mt-6 p-6 rounded-2xl bg-opacity-40 backdrop-blur-md shadow-xl w-full border border-white border-opacity-20 flex flex-col items-center"
+    style={{
+      background: "linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))",
+    }}
+  >
+    <h3 className="text-lg font-semibold text-black drop-shadow-lg">Reset Your Password</h3>
+    
+    <input
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      placeholder="Enter your email"
+      className="w-full mt-4 p-3 rounded-xl bg-white bg-opacity-20 text-black placeholder-black border border-black focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+      required
+    />
+
+    <button
+      type="submit"
+      className="mt-4 w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-105 transition duration-300 text-white font-bold py-3 rounded-xl shadow-lg"
+    >
+      Send Reset Link
+    </button>
+
+    <button
+      onClick={() => setShowForgotPassword(false)}
+      className="mt-3 text-m text-green-400 hover:text-black underline transition"
+    >
+      Back to Login
+    </button>
+  </form>
+)}
 
         <div className="text-center mt-6 text-gray-900 text-opacity-80">
           {isLoginOrRegister === "register" ? (
