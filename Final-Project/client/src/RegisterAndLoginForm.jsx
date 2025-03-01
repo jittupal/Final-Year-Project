@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import axios from "axios";
 import { UserContext } from "./UserContext.jsx";
 import backimg from "./assets/images/back.png";
+import { toast } from 'react-toastify';
 
 export default function RegisterAndLoginForm() {
   const [username, setUsername] = useState("");
@@ -25,9 +26,10 @@ export default function RegisterAndLoginForm() {
       const { data } = await axios.post(url, payload);
       setLoggedInUsername(data.username); // Set username from response
       setId(data.id);
+      toast.success(`Successfully ${isLoginOrRegister}ed!`);
     } catch (error) {
       console.error("Login/Register Error:", error);
-      alert(error.response?.data?.error || "Something went wrong");
+      toast.error(error.response?.data?.error || "Something went wrong");
     }
   }
   
@@ -39,11 +41,11 @@ export default function RegisterAndLoginForm() {
     
     try {
       const response = await axios.post("reset-password", { identifier: email, newPassword });
-      alert(response.data.message);
+      toast.success(response.data.message);
       setShowForgotPassword(false);
     } catch (error) {
       console.error("Error resetting password:", error);
-      alert("Failed to reset password");
+      toast.error("Failed to reset password");
     }
   }
 

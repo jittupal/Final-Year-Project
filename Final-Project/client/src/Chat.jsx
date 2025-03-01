@@ -5,7 +5,6 @@ import {UserContext} from "./UserContext.jsx";
 import {uniqBy} from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
-import { v4 as uuidv4 } from "uuid"; // Import UUID library
 
 export default function Chat() {
   const [ws,setWs] = useState(null);
