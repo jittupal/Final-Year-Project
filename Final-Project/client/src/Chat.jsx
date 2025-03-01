@@ -206,7 +206,7 @@ export default function Chat() {
   {/* User Info & Logout Button */}
   <div className="p-4 text-center flex items-center justify-center bg-gradient-to-r from-red-300 via-pink-300 to-purple-400 rounded-lg shadow-lg border border-gray-400">
   <span className="mr-3 text-lg uppercase text-gray-800 flex items-center font-bold">
-  {username.split('@')[0]}
+  {username}
 </span>
     <button 
       onClick={logout} 

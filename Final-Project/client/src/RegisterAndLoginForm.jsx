@@ -40,7 +40,7 @@ export default function RegisterAndLoginForm() {
     if (!newPassword) return;
     
     try {
-      const response = await axios.post("reset-password", { identifier: email, newPassword });
+      const response = await axios.post("reset-password", { email, newPassword });
       toast.success(response.data.message);
       setShowForgotPassword(false);
     } catch (error) {

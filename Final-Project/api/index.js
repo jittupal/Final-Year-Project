@@ -151,10 +151,10 @@ app.delete('/messages/:id', async (req, res) => {
 });
 
 app.post('/reset-password', async (req, res) => {
-  const { username, newPassword } = req.body;
+  const { email, newPassword } = req.body;
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
