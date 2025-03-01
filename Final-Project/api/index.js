@@ -60,7 +60,7 @@ app.get('/messages/:userId', async (req,res) => {
 });
 
 app.get('/people', async (req,res) => {
-  const users = await User.find({}, {'_id':1,username:1});
+  const users = await User.find({}, {'_id':1, username:1, email:1}); // Added email field
   res.json(users);
 });
 
@@ -76,18 +76,40 @@ app.get('/profile', (req,res) => {
   }
 });
 
-app.post('/login', async (req,res) => {
-  const {username, password} = req.body;
-  const foundUser = await User.findOne({username});
-  if (foundUser) {
-    const passOk = bcrypt.compareSync(password, foundUser.password);
-    if (passOk) {
-      jwt.sign({userId:foundUser._id,username}, jwtSecret, {}, (err, token) => {
-        res.cookie('token', token, {sameSite:'none', secure:true}).json({
-          id: foundUser._id,
-        });
-      });
+app.post('/login', async (req, res) => {
+  const { identifier, password } = req.body; // Accepts either email or username
+
+  try {
+    const foundUser = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }], // Allow login via email or username
+    });
+
+    if (!foundUser) {
+      return res.status(400).json({ error: 'User not found' });
     }
+
+    const passOk = bcrypt.compareSync(password, foundUser.password);
+    if (!passOk) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Destructure username properly
+    const { username } = foundUser;
+
+    jwt.sign({ userId: foundUser._id, username }, jwtSecret, {}, (err, token) => {
+      if (err) {
+        console.error('JWT Sign Error:', err);
+        return res.status(500).json({ error: 'Token generation failed' });
+      }
+
+      res.cookie('token', token, { sameSite: 'none', secure: true }).json({
+        id: foundUser._id,
+        username: foundUser.username, // Return username for frontend
+      });
+    });
+  } catch (err) {
+    console.error('Login Error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -155,23 +177,47 @@ app.post('/logout', (req,res) => {
   res.cookie('token', '', {sameSite:'none', secure:true}).json('ok');
 });
 
-app.post('/register', async (req,res) => {
-  const {username,password} = req.body;
+app.post('/register', async (req, res) => {
+  const { username, email, password } = req.body; // Ensure email is included
+
   try {
+    // Validate required fields
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    // Check if the email or username already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username or Email already in use' });
+    }
+
+    // Hash the password
     const hashedPassword = bcrypt.hashSync(password, bcryptSalt);
+
+    // Create the user with all required fields
     const createdUser = await User.create({
-      username:username,
-      password:hashedPassword,
+      username,
+      email, // ✅ Fixed: Email is now included in user creation
+      password: hashedPassword,
     });
-    jwt.sign({userId:createdUser._id,username}, jwtSecret, {}, (err, token) => {
-      if (err) throw err;
-      res.cookie('token', token, {sameSite:'none', secure:true}).status(201).json({
-        id: createdUser._id,
-      });
+
+    // Generate JWT token
+    jwt.sign({ userId: createdUser._id, username }, jwtSecret, {}, (err, token) => {
+      if (err) {
+        console.error('JWT Sign Error:', err);
+        return res.status(500).json({ error: 'Token generation failed' });
+      }
+      res.cookie('token', token, { sameSite: 'none', secure: true })
+        .status(201).json({
+          id: createdUser._id,
+          username: createdUser.username,
+          email: createdUser.email, // Return email for frontend use
+        });
     });
-  } catch(err) {
-    if (err) throw err;
-    res.status(500).json('error');
+  } catch (err) {
+    console.error('Registration Error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

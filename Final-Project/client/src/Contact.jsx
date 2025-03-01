@@ -19,10 +19,10 @@ export default function Contact({ id, username, onClick, selected, online, lastM
     >
       {selected && <div className="w-1.5 bg-purple-500 h-12 rounded-r-full"></div>}
       <div className="flex gap-4 py-4 px-5 items-center w-full">
-        <Avatar online={online} username={username} userId={id} />
+        <Avatar online={online} username={username.split('@')[0]} userId={id} />
         <div className="flex flex-col w-full">
           <span className="text-gray-900 font-semibold text-base tracking-wide">
-            {username}
+          {username.split('@')[0]}
           </span>
           <span className={online ? "text-green-500 text-sm font-medium" : "text-gray-500 text-sm"}>
             {online ? "Online" : "Offline"}

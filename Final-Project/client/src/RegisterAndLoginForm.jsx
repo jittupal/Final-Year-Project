@@ -5,30 +5,40 @@ import backimg from "./assets/images/back.png";
 
 export default function RegisterAndLoginForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoginOrRegister, setIsLoginOrRegister] = useState("login");
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [email, setEmail] = useState("");
-
-
 
   async function handleSubmit(ev) {
     ev.preventDefault();
     const url = isLoginOrRegister === "register" ? "register" : "login";
-    const { data } = await axios.post(url, { username, password });
-    setLoggedInUsername(username);
-    setId(data.id);
+  
+    const identifier = isLoginOrRegister === "register" ? email : (email || username); 
+  
+    const payload = isLoginOrRegister === "register"
+      ? { username, email, password }
+      : { identifier, password }; // Allow login via email or username
+  
+    try {
+      const { data } = await axios.post(url, payload);
+      setLoggedInUsername(data.username); // Set username from response
+      setId(data.id);
+    } catch (error) {
+      console.error("Login/Register Error:", error);
+      alert(error.response?.data?.error || "Something went wrong");
+    }
   }
-
+  
 
   async function handleForgotPassword(ev) {
     ev.preventDefault();
     const newPassword = prompt("Enter your new password:");
     if (!newPassword) return;
-  
+    
     try {
-      const response = await axios.post("reset-password", { username: email, newPassword });
+      const response = await axios.post("reset-password", { identifier: email, newPassword });
       alert(response.data.message);
       setShowForgotPassword(false);
     } catch (error) {
@@ -36,7 +46,6 @@ export default function RegisterAndLoginForm() {
       alert("Failed to reset password");
     }
   }
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center p-8 relative overflow-hidden" style={{ backgroundImage: `url(${backimg})` }}>
@@ -46,11 +55,20 @@ export default function RegisterAndLoginForm() {
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-8 w-full">
+          {isLoginOrRegister === "register" && (
+            <input
+              value={username}
+              onChange={(ev) => setUsername(ev.target.value)}
+              type="text"
+              placeholder="Username"
+              className="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 bg-white bg-opacity-80 placeholder-gray-600 text-gray-900 shadow-lg"
+            />
+          )}
           <input
-            value={username}
-            onChange={(ev) => setUsername(ev.target.value)}
+            value={email}
+            onChange={(ev) => setEmail(ev.target.value)}
             type="text"
-            placeholder="Email"
+            placeholder="Email or Username"
             className="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 bg-white bg-opacity-80 placeholder-gray-600 text-gray-900 shadow-lg"
           />
           <input
@@ -65,8 +83,7 @@ export default function RegisterAndLoginForm() {
           </button>
         </form>
         
- {/* Forgot Password Button */}
- {isLoginOrRegister === "login" && (
+        {isLoginOrRegister === "login" && (
           <button
             onClick={() => setShowForgotPassword(!showForgotPassword)}
             className="mt-3 text-sm text-gray-700 hover:underline w-full text-center"
@@ -75,14 +92,13 @@ export default function RegisterAndLoginForm() {
           </button>
         )}
 
-        {/* Forgot Password Form (Appears on Click) */}
         {showForgotPassword && (
           <form onSubmit={handleForgotPassword} className="mt-3 bg-gray-100 p-4 rounded-md shadow w-full">
             <input
-              type="text"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="Enter your email or username"
               className="w-full p-2 border border-gray-300 rounded-md"
               required
             />
