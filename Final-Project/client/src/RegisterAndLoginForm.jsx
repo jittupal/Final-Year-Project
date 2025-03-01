@@ -13,6 +13,15 @@ export default function RegisterAndLoginForm() {
   const { setUsername: setLoggedInUsername, setId } = useContext(UserContext);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+ 
+  
+  // ✅ NEW: State for password reset prompt box
+  const [showResetPrompt, setShowResetPrompt] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  
+
+  
+
   async function handleSubmit(ev) {
     ev.preventDefault();
     const url = isLoginOrRegister === "register" ? "register" : "login";
@@ -37,19 +46,45 @@ export default function RegisterAndLoginForm() {
 
   async function handleForgotPassword(ev) {
     ev.preventDefault();
-    const newPassword = prompt("Enter your new password:");
-    if (!newPassword) return;
     
+    // ✅ Modified: No prompt() here, now handled in a separate UI box
+    setShowResetPrompt(true);
+  }
+
+  // ✅ NEW: Function to confirm password reset
+  async function handleConfirmResetPassword() {
+    if (!newPassword) return toast.error("Password cannot be empty");
+
     try {
-      const response = await axios.post("reset-password", { email: forgotEmail, newPassword });
+      const response = await axios.post("reset-password", {
+        email: forgotEmail,
+        newPassword,
+      });
       toast.success(response.data.message);
-      setShowForgotPassword(false);
-      setForgotEmail(""); // Clear input after reset
+      setShowResetPrompt(false);
+      setForgotEmail("");
+      setNewPassword("");
     } catch (error) {
       console.error("Error resetting password:", error);
       toast.error("Failed to reset password");
     }
   }
+
+  // async function handleForgotPassword(ev) {
+  //   ev.preventDefault();
+  //   const newPassword = prompt("Enter your new password:");
+  //   if (!newPassword) return;
+    
+  //   try {
+  //     const response = await axios.post("reset-password", { email: forgotEmail, newPassword });
+  //     toast.success(response.data.message);
+  //     setShowForgotPassword(false);
+  //     setForgotEmail(""); // Clear input after reset
+  //   } catch (error) {
+  //     console.error("Error resetting password:", error);
+  //     toast.error("Failed to reset password");
+  //   }
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center p-8 relative overflow-hidden" style={{ backgroundImage: `url(${backimg})` }}>
@@ -130,6 +165,41 @@ export default function RegisterAndLoginForm() {
     </button>
   </form>
 )}
+
+ {/* ✅ Modernized Password Reset Prompt Box */}
+{showResetPrompt && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-md">
+    <div className="bg-gradient-to-br from-[#1e293b] to-[#475569] p-8 rounded-2xl shadow-2xl w-96 text-center border border-white border-opacity-20">
+      <h3 className="text-xl font-bold text-white mb-4 drop-shadow-lg">
+        🔒 Reset Your Password
+      </h3>
+
+      <input
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        placeholder="Enter new password"
+        className="w-full p-4 rounded-lg border border-gray-300 bg-white/20 text-white placeholder-gray-300 focus:ring-2 focus:ring-cyan-400 focus:outline-none transition"
+      />
+
+      <div className="mt-6 flex justify-between">
+        <button
+          onClick={() => setShowResetPrompt(false)}
+          className="px-5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition shadow-md"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleConfirmResetPassword}
+          className="px-5 py-2 bg-cyan-500 text-white font-semibold rounded-lg hover:bg-cyan-600 transition shadow-md"
+        >
+          Reset Password
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
         <div className="text-center mt-6 text-gray-900 text-opacity-80">
           {isLoginOrRegister === "register" ? (
