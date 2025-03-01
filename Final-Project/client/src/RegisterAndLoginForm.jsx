@@ -67,8 +67,8 @@ export default function RegisterAndLoginForm() {
           <input
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
-            type="text"
-            placeholder="Email or Username"
+            type={isLoginOrRegister === "register" ? "email" : "text"} // Enforce email during registration, allow both for login
+            placeholder={isLoginOrRegister === "register" ? "Email" : "Email or Username"}
             className="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 bg-white bg-opacity-80 placeholder-gray-600 text-gray-900 shadow-lg"
           />
           <input
