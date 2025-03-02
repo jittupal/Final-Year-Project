@@ -117,18 +117,18 @@ export default function RegisterAndLoginForm() {
             placeholder="Password"
             className="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-purple-500 bg-white bg-opacity-80 placeholder-gray-600 text-gray-900 shadow-lg"
           />
-          <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:scale-105 transition duration-300 text-white font-bold py-4 rounded-xl shadow-xl">
-            {isLoginOrRegister === "register" ? "Register" : "Login"}
-          </button>
+         <button className="w-full bg-gradient-to-r from-purple-600 to-indigo-500 hover:from-pink-500 hover:to-orange-400 hover:scale-105 transition duration-300 ease-in-out text-white font-bold py-4 rounded-xl shadow-xl">
+  {isLoginOrRegister === "register" ? "Register" : "Login"}
+</button>
         </form>
         
         {isLoginOrRegister === "login" && (
           <button
-            onClick={() => setShowForgotPassword(!showForgotPassword)}
-            className="mt-3 text-sm text-gray-700 hover:underline w-full text-center"
-          >
-            Forgot Password?
-          </button>
+          onClick={() => setShowForgotPassword(!showForgotPassword)}
+          className="mt-3 text-base font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-pink-500 transition duration-300 ease-in-out hover:underline w-full text-center"
+        >
+          Forgot your password?
+        </button>        
         )}
 
 {showForgotPassword && (
@@ -203,25 +203,25 @@ export default function RegisterAndLoginForm() {
 
         <div className="text-center mt-6 text-gray-900 text-opacity-80">
           {isLoginOrRegister === "register" ? (
-            <p>
-              Already have an account?
-              <button
-                className="text-indigo-600 hover:text-indigo-800 underline ml-1"
-                onClick={() => setIsLoginOrRegister("login")}
-              >
-                Login here
-              </button>
-            </p>
+            <p className="text-base font-medium text-gray-700">
+            Already have an account?
+            <button
+              className="ml-1 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 hover:from-purple-500 hover:to-pink-500 font-semibold transition duration-300 ease-in-out hover:underline scale-105"
+              onClick={() => setIsLoginOrRegister("login")}
+            >
+              Login here
+            </button>
+          </p>
           ) : (
-            <p>
-              Don't have an account?
-              <button
-                className="text-indigo-600 hover:text-indigo-800 underline ml-1"
-                onClick={() => setIsLoginOrRegister("register")}
-              >
-                Register
-              </button>
-            </p>
+          <p className="text-base font-medium text-gray-700">
+            Don't have an account?
+            <button
+              className="ml-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-500 hover:from-teal-500 hover:to-blue-500 font-semibold transition duration-300 ease-in-out hover:underline scale-105"
+              onClick={() => setIsLoginOrRegister("register")}
+            >
+              Register
+            </button>
+          </p>
           )}
         </div>
       </div>
